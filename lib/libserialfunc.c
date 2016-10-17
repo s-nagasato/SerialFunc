@@ -44,7 +44,7 @@ int Serial_PortOpen_Half( char *AsDev, long AlSpeed, int AiLength, int AiStop, i
 {
 	static int iPort;
 
-	iPort = Serial_PortOpen_Func(AsDev, AlSpeed, AiLength, AiStop, AiParity, AiWait, AiBlockMode);
+	iPort = Serial_PortOpen_Func(AsDev, AlSpeed, AiLength, AiStop, AiParity, AiWait, AiBlockMode, 0);
 
 	ioctl( iPort, TIOCSRS485, 1  ); // rs485 enable
 
@@ -62,8 +62,9 @@ int Serial_PortOpen_Half( char *AsDev, long AlSpeed, int AiLength, int AiStop, i
 /// \param   AiParity     シリアルポートのパリティ 0(n),1(e),2(o)
 /// \param   AiWait       シリアルポートの受信待ち時間
 /// \param   AiOpenMode   シリアルポートのオープン時のブロッキング(0:無効 1:有効)
+/// \param   AiFlow       シリアルポートのオープン時のフロー制御 ( 0:なし, 1:RTS/CTS, 2:DTR/DSR )
 //////////////////////////////////////////////////////////////////////////////
-int Serial_PortOpen_Func( char *AsDev, long AlSpeed, int AiLength, int AiStop, int AiParity ,int AiWait, int AiOpenMode ){
+int Serial_PortOpen_Func( char *AsDev, long AlSpeed, int AiLength, int AiStop, int AiParity ,int AiWait, int AiOpenMode, int AiFlow ){
 	static struct termios newtio;
 	static int iPort;
 	static int iOpenMode;
@@ -83,7 +84,7 @@ int Serial_PortOpen_Func( char *AsDev, long AlSpeed, int AiLength, int AiStop, i
 	// 現在のシリアルポートの設定を保存(Close時に戻す為)
 	tcgetattr( iPort, &oldtio );
 
-	Serial_PortSetParameter(iPort, AlSpeed, AiLength, AiStop, AiParity, AiWait);
+	Serial_PortSetParameter(iPort, AlSpeed, AiLength, AiStop, AiParity, AiWait, AiFlow);
 
 	return iPort;
 }
@@ -98,7 +99,7 @@ int Serial_PortOpen_Func( char *AsDev, long AlSpeed, int AiLength, int AiStop, i
 /// \param   AiParity     シリアルポートのパリティ 0(n),1(e),2(o)
 /// \param   AiWait       シリアルポートの受信待ち時間
 //////////////////////////////////////////////////////////////////////////////
-void Serial_PortSetParameter(int AiPort, int AiSpeed, int AiLength, int AiStop, int AiParity, int AiWait)
+void Serial_PortSetParameter(int AiPort, int AiSpeed, int AiLength, int AiStop, int AiParity, int AiWait, int AiFlow)
 {
 	static struct termios newtio;
 
@@ -187,9 +188,27 @@ void Serial_PortSetParameter(int AiPort, int AiSpeed, int AiLength, int AiStop, 
 			// PARENB  : パリティを有効にし奇数をセット
 			newtio.c_cflag = newtio.c_cflag | PARENB | PARODD ;
 			break;
+		default:
+			// NO PARITY
+			break;
 	}
+
+	// Ver 1.0.3 Flow Control Added 
+	// Setting of hardware flow 
+	switch( AiFlow ){
+		case 1:
+			// CRTSCTS  : enables hardware flow
+			newtio.c_cflag = newtio.c_cflag | CRTSCTS;
+			break;
+		case 0:	
+		default:
+			// no hardware flow
+			break;
+	}
+	// Ver 1.0.3 End
+	
 //	newtio.c_cflag = newtio.c_cflag | CLOCAL | CREAD;
-	newtio.c_cflag = newtio.c_cflag | CLOCAL | CRTSCTS | CREAD;
+	newtio.c_cflag = newtio.c_cflag | CLOCAL | CREAD;
 
 	///// c_iflagの設定 /////
 //	newtio.c_iflag = IGNPAR; // IGNPAR : パリティエラーのデータは無視
@@ -253,9 +272,9 @@ int Serial_PutChar( int AiPort, unsigned char AcChar )
 /// \return  受信データ(1バイト)
 /// \param   AiPort     シリアルポート記述子
 //////////////////////////////////////////////////////////////////////////////
-int Serial_GetChar( int AiPort )
+unsigned char Serial_GetChar( int AiPort )
 {
-	static unsigned char cRet;
+	static unsigned char cRet = 0xFF;
 	static int iRet;
 
 	iRet = read( AiPort, (char *)&cRet, 1 );

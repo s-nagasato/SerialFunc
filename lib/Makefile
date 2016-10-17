@@ -1,27 +1,43 @@
-CC = gcc #selfbuild
-#CC=arm-linux-gnueabi-gcc #crossbuild
+#CC = gcc #selfbuild
+#LD = ld
+CC=arm-linux-gnueabi-gcc #crossbuild
+LD = arm-linux-gnueabi-ld
 CFLAGS= -g -Wall
-VERSION=1.0.2
-INSTALL_DIR=/usr/local/lib/
+VERSION=1.0.3
 
-SRC_NAME=libserialfunc
-LIB_NAME=libSerialFunc
+TARGET=libSerialFunc.so
+OBJ=libserialfunc.o
+SRC=libserialfunc.c
 
-all:$(LIB_NAME).o ${LIB_NAME}.so
+# CPS_SDK_MACRO_CHECK ( without CONPROSYS SDK )
+ifneq "$(CPS_SDK_INSTALL_FULLDIR)" ""
+TARGET_ROOTFS   := ${CPS_SDK_INSTALL_FULLDIR}/rootfs
+endif
 
-${LIB_NAME}.o:	
-	${CC} ${SRC_NAME}.c -c -fPIC -o ${LIB_NAME}.o
+ifneq "$(CPS_SDK_ROOTDIR)" ""
+CPS_LIB_REELASE_DIR:=../../release
+else
+CPS_LIB_REELASE_DIR:=./
+endif
 
-${LIB_NAME}.so:
-	${CC} -shared -O2 -Wl,-soname,${LIB_NAME}.so -o ${LIB_NAME}.so.${VERSION} ${LIB_NAME}.o
+
+all:$(OBJ) ${TARGET}
+
+$(OBJ):	
+	${CC} ${INCLUDE} ${LD_FLAGS} $(SRC) -c -fPIC -o $(OBJ) -lm
+
+$(TARGET):
+	${CC} ${INCLUDE} ${LD_FLAGS}  -shared -O2 -Wl,-soname,$(TARGET) -o $(TARGET) $(OBJ) -lm
 
 install:
-	cp ${LIB_NAME}.so.${VERSION} ${INSTALL_DIR}
-	ldconfig
+	cp -p $(TARGET) $(TARGET_ROOTFS)/usr/local/lib/$(TARGET).$(VERSION)
+	@if [ ! -f $(TARGET_ROOTFS)/usr/local/lib/$(TARGET) ]; then \
+	( cd $(TARGET_ROOTFS)/usr/local/lib/ && ln -s $(TARGET).$(VERSION) $(TARGET) ) \
+	fi
 
-uninstall:
-	rm ${INSTALL_DIR}/${LIB_NAME}.so.*
-	ldconfig
+release_copy:
+	cp -p ./$(TARGET) $(CPS_LIB_REELASE_DIR)/$(TARGET).$(VERSION)
 
 clean:
-	rm -f *.o *.so *.so.*
+	rm -f $(OBJ) $(TARGET)
+

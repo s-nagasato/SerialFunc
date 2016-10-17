@@ -23,7 +23,9 @@ int main(int argc, char **argv){
 		printf(" -d[Data]\n");
 		printf(" -w[Wait(ms)]\n");
 		printf(" -Format=[Format(ASC or HEX)]\n");
-		printf(" -f  :full duplex\n");
+		printf(" -f[FlowControl] :full duplex\n");
+		printf("        -fn : FlowControl None\n");
+		printf("        -fr : FlowControl RTS/CTS \n"); 
 		printf(" -h  :half duplex(default)\n");
 
 		return -1;
@@ -35,6 +37,7 @@ int main(int argc, char **argv){
 	int iParity = 1;
 	
 	int iCnt = 5;
+	int iFlow = 0;
 	int iWait = 700;
 	char cMsg[512]={0};
 	sprintf(cMsg, "0123456789abcdefghijklmnopqrstuvwxyz");
@@ -105,6 +108,13 @@ int main(int argc, char **argv){
 		//duplex
 		if(strncmp(argv[i], "-f", strlen("-f")) == 0){
 			dup = 1;
+			//Hardware Control
+			if(strncmp(argv[i], "-fn", strlen("-fn")) == 0){
+				iFlow = 0;
+			}
+			else if(strncmp(argv[i], "-fr", strlen("-fr")) == 0){
+				iFlow = 1;
+			}
 		}
 		if(strncmp(argv[i], "-h", strlen("-h")) == 0){
 			dup = 0;
@@ -130,7 +140,7 @@ int main(int argc, char **argv){
 		return ret;
 	}
 	
-	printf("%s %s, %d, %d, %d %d\n", argv[1], argv[2], iBaudrate, iLength, iStop, iParity);
+	printf("%s %s, %d, %d, %d %d %d\n", argv[1], argv[2], iBaudrate, iLength, iStop, iParity, iFlow);
 	printf("Wait = %dms Cnt = %d\n", iWait, iCnt);
 
 	if( iFormat == 0) {
@@ -160,13 +170,13 @@ int main(int argc, char **argv){
 	
 	}else{
 	
-		iPort1 = Serial_PortOpen_Full(argv[1], iBaudrate, iLength, iStop, iParity, iWait, 1);
+		iPort1 = Serial_PortOpen_Full(argv[1], iBaudrate, iLength, iStop, iParity, iWait, 1, iFlow);
 		if(iPort1 < 0){
 			printf("open error\n");
 			return -1;
 		}
 
-		iPort2 = Serial_PortOpen_Full(argv[2], iBaudrate, iLength, iStop, iParity, iWait, 1);
+		iPort2 = Serial_PortOpen_Full(argv[2], iBaudrate, iLength, iStop, iParity, iWait, 1, iFlow);
 		if(iPort2 < 0){
 			printf("open error\n");
 			return -1;
