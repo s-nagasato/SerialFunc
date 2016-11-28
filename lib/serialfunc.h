@@ -14,13 +14,15 @@ extern void Serial_PortSetParameter(int AiPort, int AiSpeed, int AiLength, int A
 extern void Serial_PortClose( int AiPort );
 extern int Serial_PutChar( int AiPort, unsigned char AcChar );
 extern unsigned char Serial_GetChar( int AiPort );
-extern int Serial_GetString( int AiPort, char *AsBuffer, int AiLen );
-extern int Serial_PutString( int AiPort, char *AsBuffer, int AiLen );
+extern int Serial_GetString( int AiPort, unsigned char *AsBuffer, int AiLen );
+extern int Serial_PutString( int AiPort, unsigned char *AsBuffer, int AiLen );
 extern int Serial_SumCheck( char *AsBuffer, int AiLen, int AiComplement );
 extern void Serial_Set_Rts( int AiPort, int AiValue );
 extern void Serial_Set_Dtr( int AiPort, int AiValue );
 extern void Serial_Get_Lsr( int AiPort, int *AiValue );
 
+extern void Serial_Get_In_Buffer( int AiPort, int *AiValue );
+extern void Serial_Get_Out_Buffer( int AiPort, int *AiValue );
 
 #define Serial_PortOpen_Full( AsDev, AlSpeed, AiLength, AiStop, AiParity, AiWait, AiBlockMode, AiFlow) \
 	Serial_PortOpen_Func( AsDev, AlSpeed, AiLength, AiStop, AiParity, AiWait, AiBlockMode, AiFlow)

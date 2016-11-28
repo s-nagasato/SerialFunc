@@ -26,6 +26,8 @@
 #include <linux/serial.h>
 #include "serialfunc.h"
 
+#define LIB_SERIAL_VERSION	"1.0.4"
+
 static struct termios oldtio; //!< 現在のシリアルポートの設定を格納
 
 //////////////////////////////////////////////////////////////////////////////
@@ -290,7 +292,7 @@ unsigned char Serial_GetChar( int AiPort )
 /// \param   *AsBuffer  読込んだ文字列を格納するバッファへのポインタ
 /// \param   AiLen       一度に読込むバイト数
 //////////////////////////////////////////////////////////////////////////////
-int Serial_GetString( int AiPort, char *AsBuffer, int AiLen )
+int Serial_GetString( int AiPort, unsigned char *AsBuffer, int AiLen )
 {
 	static int iRet = 0;
 	struct serial_icounter_struct icount;
@@ -311,7 +313,7 @@ ioctl( AiPort, TIOCGICOUNT, &icount);
 /// \param   *AsBuffer  送信文字列へのポインタ
 /// \param   AiLen      書込みバイト数
 //////////////////////////////////////////////////////////////////////////////
-int Serial_PutString( int AiPort, char *AsBuffer, int AiLen )
+int Serial_PutString( int AiPort, unsigned char *AsBuffer, int AiLen )
 {
 	//if( write( AiPort, AsBuffer, AiLen ) != 1 ){
 	//	return -1;
@@ -406,4 +408,42 @@ void Serial_Get_Lsr( int AiPort, int *AiValue ){
 		printf(" Parity Error!\n");
 
 	*AiValue = lsr;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// \brief   シリアルポートの入力バッファを取得します
+///
+/// \return  void
+/// \param   AiPort   シリアルポート記述子
+/// \param   AiValue  入力バッファの値
+//////////////////////////////////////////////////////////////////////////////
+void Serial_Get_In_Buffer( int AiPort, int *AiValue ){
+
+	ioctl( AiPort, FIONREAD, AiValue);
+
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// \brief   シリアルポートの出力バッファを取得します
+///
+/// \return  void
+/// \param   AiPort   シリアルポート記述子
+/// \param   AiValue  出力バッファの値
+//////////////////////////////////////////////////////////////////////////////
+void Serial_Get_Out_Buffer( int AiPort, int *AiValue ){
+
+	ioctl( AiPort, TIOCOUTQ, AiValue);
+
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// \brief   シリアルライブラリのバージョンを取得します
+///
+/// \return  void
+/// \param   libVer   ライブラリのバージョン
+//////////////////////////////////////////////////////////////////////////////
+void Serial_Get_Lib_Version( char *libVer ){
+
+	strcpy(libVer,LIB_SERIAL_VERSION);
+
 }

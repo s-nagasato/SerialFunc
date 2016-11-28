@@ -190,12 +190,12 @@ int main(int argc, char **argv){
 	
 	for(i = 0; i< iCnt; i++){
 		//��ǂ�
-		(void)Serial_GetString(iPort2, cRecv, sizeof(cRecv));
+		Serial_GetString(iPort2, (unsigned char*)&cRecv[0], sizeof(cRecv));
 
 		//Serial_PutString(iPort, cMsg, sizeof(cMsg));
-		Serial_PutString(iPort1, cMsg, strlen(cMsg) * sizeof(char));
+		Serial_PutString(iPort1, (unsigned char*)&cMsg[0], strlen(cMsg) * sizeof(char));
 		usleep(iWait * 1000);
-		Serial_GetString(iPort2, cRecv, sizeof(cRecv));
+		Serial_GetString(iPort2, (unsigned char*)&cRecv[0], sizeof(cRecv));
 		if( iFormat == 0 ){
 			printf("Put = %s, Recv = %s\n", cMsg, cRecv);
 		}else if( iFormat == 1 ){
