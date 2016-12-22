@@ -26,9 +26,25 @@
 #include <linux/serial.h>
 #include "serialfunc.h"
 
-#define LIB_SERIAL_VERSION	"1.0.4"
+#define LIB_SERIAL_VERSION	"1.0.5"
 
 static struct termios oldtio; //!< 現在のシリアルポートの設定を格納
+
+/*!
+ @~English
+ @name DebugPrint macro
+ @~Japanese
+ @name デバッグ用表示マクロ
+*/
+/// @{
+
+#if 1
+#define DbgPrint(fmt...)	printf(fmt)
+#else
+#define DbgPrint(fmt...)	do { } while (0)
+#endif
+
+/// @}
 
 //////////////////////////////////////////////////////////////////////////////
 /// \brief   シリアルポートを半二重通信でオープンする関数
@@ -320,6 +336,7 @@ int Serial_PutString( int AiPort, unsigned char *AsBuffer, int AiLen )
 	//}
 	
 	//return 0;
+	DbgPrint("<Serial PutString AsBuf %s , Len : %d \n", AsBuffer, AiLen );
 
 	return write( AiPort, AsBuffer, AiLen );
 }
