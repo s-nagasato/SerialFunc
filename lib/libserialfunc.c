@@ -26,7 +26,7 @@
 #include <linux/serial.h>
 #include "serialfunc.h"
 
-#define LIB_SERIAL_VERSION	"1.0.5"
+#define LIB_SERIAL_VERSION	"1.0.6"
 
 static struct termios oldtio; //!< 現在のシリアルポートの設定を格納
 
@@ -350,18 +350,19 @@ int Serial_PutString( int AiPort, unsigned char *AsBuffer, int AiLen )
 /// \param   AiComplement サムチェックに2の補数を適用 1…適用,他…非適用
 //////////////////////////////////////////////////////////////////////////////
 int Serial_SumCheck( char *AsBuffer, int AiLen, int AiComplement ){
-        int iRet = 0;
-        int i = 0;
+	int iRet = 0;
+	int i = 0;
 
-        for( i = 0 ; i < AiLen ; i++ ){
-                iRet = iRet + AsBuffer[i];
-        }
-        if( AiComplement == 1 ){
-                iRet ^= 0xff;
-                iRet = iRet + 1;
-        }
-        iRet = iRet % 0x100;
-        return iRet;
+	for( i = 0 ; i < AiLen ; i++ ){
+		iRet = iRet + AsBuffer[i];
+	}
+
+	if( AiComplement == 1 ){
+		iRet ^= 0xff;
+		iRet = iRet + 1;
+	}
+	iRet = iRet % 0x100;
+	return iRet;
 }
 
 
@@ -425,6 +426,60 @@ void Serial_Get_Lsr( int AiPort, int *AiValue ){
 		printf(" Parity Error!\n");
 
 	*AiValue = lsr;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// \brief   RIの値を取得する関数
+///
+/// \return  int	取得値(0:OFF , 1:ON)
+/// \param   AiPort   シリアルポート記述子
+//////////////////////////////////////////////////////////////////////////////
+int Serial_Get_Ri( int AiPort ){
+
+	int a;
+
+	ioctl( AiPort, TIOCMGET, &a );
+
+	if( a & TIOCM_RI )
+		return 1;
+	else
+		return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// \brief   DCDの値を取得する関数
+///
+/// \return  int 取得値(0:OFF , 1:ON)
+/// \param   AiPort   シリアルポート記述子
+//////////////////////////////////////////////////////////////////////////////
+int Serial_Get_Dcd( int AiPort ){
+
+	int a;
+
+	ioctl( AiPort, TIOCMGET, &a );
+
+	if( a & TIOCM_CAR )
+		return 1;
+	else
+		return 0;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// \brief   DSRの値を取得する関数
+///
+/// \return  int 取得値(0:OFF , 1:ON)
+/// \param   AiPort   シリアルポート記述子
+//////////////////////////////////////////////////////////////////////////////
+int Serial_Get_Dsr( int AiPort ){
+
+	int a;
+
+	ioctl( AiPort, TIOCMGET, &a );
+
+	if( a & TIOCM_DSR )
+		return 1;
+	else
+		return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////////
