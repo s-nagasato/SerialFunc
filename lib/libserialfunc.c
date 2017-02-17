@@ -238,7 +238,7 @@ void Serial_PortSetParameter(int AiPort, int AiSpeed, int AiLength, int AiStop, 
 	///// c_lflagの設定 /////
 	newtio.c_lflag = 0;  // Set input mode (non-canonical,no echo,....)
 	/*　ICANON : カノニカル入力を有効にする */
-	newtio.c_cc[VTIME] = AiWait * 2; // 0:キャラクタタイマ ( AiWait * 2)
+	newtio.c_cc[VTIME] = AiWait / 100; // 0:キャラクタタイマ ( AiWait(msec) / 100)
 	newtio.c_cc[VMIN] = 0;  // 指定文字来るまで読み込みをブロック(0:しない 1:する)
 
 	///// モデムラインをクリア /////
