@@ -3,15 +3,21 @@
 #           
 
 
-CFLAGS      = -Wall -O2 -lm 
+CFLAGS      = -Wall -O2 
 #TARGET      = arm-none-linux-gnueabi-
-#TARGET      = arm-linux-gnueabi-
+TARGET      = arm-linux-gnueabi-
 #TARGET	=
 CC          = $(TARGET)gcc
 STRIP       = $(TARGET)strip
 INSTALL_DIR = /usr/local/bin
-USERLIBS    = -lSerialFunc
-PROGS       = self_com port2_com\
+USERLIBS    = -lSerialFunc -lm
+
+PRG_NAME1=self_com
+PRG_NAME2=port2_com
+PRG_NAME3=setrts_com
+PRG_NAME4=getdsr_com
+
+PROGS       = $(PRG_NAME1) $(PRG_NAME2) $(PRG_NAME3) $(PRG_NAME4)\
 
 
 ##### Make all######################
@@ -19,15 +25,25 @@ all : $(PROGS)
 
 
 ### Program build ###########################################################
-self_com : self_com.c $(USERLIBS)
-	$(CC) $(CFLAGS) -o self_com self_com.c \
-		$(USERLIBS) -lm 
-	$(STRIP) self_com
+$(PRG_NAME1) : $(PRG_NAME1).c $(USERLIBS)
+	$(CC) $(CFLAGS) -o $(PRG_NAME1) $(PRG_NAME1).c \
+		$(USERLIBS) 
+	$(STRIP) $(PRG_NAME1)
 
-port2_com : port2_com.c $(USERLIBS)
-	$(CC) $(CFLAGS) -o port2_com port2_com.c \
-		$(USERLIBS) -lm -lSerialFunc
-	$(STRIP) port2_com
+$(PRG_NAME2) : $(PRG_NAME2).c $(USERLIBS)
+	$(CC) $(CFLAGS) -o $(PRG_NAME2) $(PRG_NAME2).c \
+		$(USERLIBS)
+	$(STRIP) $(PRG_NAME2)
+
+$(PRG_NAME3) : $(PRG_NAME3).c $(USERLIBS)
+	$(CC) $(CFLAGS) -o $(PRG_NAME3) $(PRG_NAME3).c \
+		$(USERLIBS)
+	$(STRIP) $(PRG_NAME3)
+
+$(PRG_NAME4) : $(PRG_NAME4).c $(USERLIBS)
+	$(CC) $(CFLAGS) -o $(PRG_NAME4) $(PRG_NAME4).c \
+		$(USERLIBS)
+	$(STRIP) $(PRG_NAME4)
 
 ##### Make install #################
 install :
